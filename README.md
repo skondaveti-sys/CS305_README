@@ -1,125 +1,123 @@
-Gradebook Merge
+# Gradebook Merge
 
-Description
+## Description
 
-gradebook-merge is a Python command-line tool and library for merging Gradescope scores into a learning management system gradebook file. It helps instructors check student matches, review proposed grade changes, and prepare an updated gradebook for upload.
+**gradebook-merge** is a Python command-line tool and library for merging Gradescope scores into a learning management system (LMS) gradebook file. It helps instructors verify student matches, review proposed grade changes, and prepare an updated gradebook for upload.
 
-The command-line interface is gbmerge. It provides commands for checking input files, merging grades, generating student match reports, and initializing configuration.
+The command-line interface is named **`gbmerge`**. It provides commands for validating input files, merging grades, generating student match reports, and initializing configuration files.
 
-Table of Contents
+## Table of Contents
 
-1. Description
+1. [Description](#description)
+2. [Install](#install)
+3. [Usage](#usage)
+4. [API](#api)
+5. [Maintainers](#maintainers)
+6. [Credits](#credits)
 
-2. Install
+## Install
 
-3. Usage
+### Requirements
 
-4. API
+- **Python 3.10 or newer**
+- An LMS gradebook file in a supported format
+- A Gradescope export file in a supported format
 
-5. Maintainers
+### Installation
 
-6. Credits
+**1. Clone the repository** and navigate to the project directory:
 
-Description
-
-gradebook-merge works on the process of transferring Gradescope scores into a learning management system (LMS) gradebook upload file.
-
-The project provides tools to:
-
-- Check input files: Validate gradebook and Gradescope data before merging.
-
-- Match students: Compare student records across the two sources.
-
-- Merge scores: Prepare an updated gradebook file using the configured grading rules.
-
-- Generate match reports: Reviews how students were matched between files.
-
-- Configure merge jobs: Initializes a configuration file for a particular workflow.
-
-
-The command-line program is named gbmerge. The package also provides a Python API.
-
-Install
-
-Requirements: Python 3.10 or newer and Gradebook and Gradescope export files in supported formats.
-
-Installation:
-
-Clone this repository and navigate to the project directory:
-
+```bash
 git clone https://github.com/skondaveti-sys/CS305_README.git
-
 cd CS305_README
+```
 
-Install the package:
+**2. Install the package:**
 
+```bash
 python -m pip install -e .
+```
 
-To install the development dependencies:
+**3. (Optional) Install the development dependencies:**
 
+```bash
 python -m pip install -e ".[dev]"
+```
 
-After installation, check that the command is available:
+**4. Verify the installation:**
 
+```bash
 gbmerge --help
+```
 
-Usage
+## Usage
 
-Available Commands
+### Available Commands and Their Purposes
 
-Command                       Purpose
+The `gbmerge` command-line interface provides the following operations:
 
-gbmerge check.            Check input files and their compatibility.
+| Command | Purpose |
+|---|---|
+| `gbmerge check` | **Validate input files** and check their compatibility before merging. |
+| `gbmerge merge` | **Merge Gradescope scores** into the LMS gradebook file. |
+| `gbmerge match-report` | **Generate a student matching report** to help identify and review matches between records. |
+| `gbmerge init-config` | **Initialize a configuration file** for a particular grading workflow. |
 
-gbmerge merge             Merge Gradescope scores into the LMS gradebook.
+### Typical Workflow
 
-gbmerge match-report      Generate a report about student matching.
+Follow these steps to prepare and merge grades:
 
-gbmerge init-config       Initialize a configuration file.
+1. **Prepare the input files:** Export the LMS gradebook and Gradescope scores.
+2. **Initialize configuration:** Create a configuration file if your workflow requires one.
+3. **Validate the inputs:** Check the files for compatibility and review student matching.
+4. **Generate a match report:** Investigate questionable or uncertain student matches.
+5. **Merge the grades:** Run the merge command with the appropriate options.
+6. **Review the output:** Inspect the updated gradebook carefully before uploading it to the LMS.
 
+### Configuration
 
-Typical Workflow:
+The repository includes **`config-example.yml`** as a starting point for configuration.
 
-1.Prepare the LMS gradebook and Gradescope export.
+Review the configuration carefully before using it for a course. **Grading options must reflect the course's actual grading policies.** For example, do not enable a `drop-lowest` setting unless the course actually uses that grading rule.
 
-2.Initialize a configuration file if your workflow requires one.
+## API
 
-3.Check the inputs and review student matching.
+The project provides both a **Python API** and the **`gbmerge` command-line interface**.
 
-4.Generate a match report and investigate questionable matches.
+The main API entry point is `MergeJob`. The package also supports functionality related to:
 
-5.Run the merge with the appropriate options.
+- Student matching
+- Grading policies
+- Upload planning
+- Output generation
+- Audit logging
 
-6.Inspect the output before uploading it to the LMS.
+### Command-Line Help
 
-Configuration: The repository includes config-example.yml as a starting point for configuration. Review the configuration carefully before using it for a course. Grading options must reflect the course's actual policies. For example, a drop-lowest setting should not be enabled unless the course uses that grading rule.
+To view all available commands and general options, run:
 
-API
-
-The project gives us a Python API and the gbmerge command-line interface.
-
-The main API entry point is MergeJob. The package also supports functionality related to student matching, grading policies, upload planning, output generation, and audit logging.
-
-Command-Line Help
-
-To inspect the CLI options:
-
+```bash
 gbmerge --help
+```
 
-To inspect the options for an individual operation:
+To view the options for the merge operation, run:
 
+```bash
 gbmerge merge --help
+```
 
-Python API Reference
+### Python API Reference
 
-The implementation is located in src/gbmerge/. Use the source files there for the exact class constructors, function signatures, parameters, and return values.
+The implementation is located in **`src/gbmerge/`**.
 
-Maintainers
+Refer to the source files in this directory for the exact class constructors, function signatures, parameters, and return values.
 
-This README is maintained by Shritan Kondaveti as part of the CS305 README assignment in the CS305_README GitHub repository.
+## Maintainers
 
-Credits
+This README is maintained by **Shritan Kondaveti** as part of the CS305 README assignment in the **CS305_README** GitHub repository.
 
-This repository is based on the original readme-project-gradebook-merge project.
+## Credits
 
-Credit goes to the original project author: Tim Richards.
+This repository is based on the original **readme-project-gradebook-merge** project.
+
+Credit goes to the original project author, **Tim Richards**.

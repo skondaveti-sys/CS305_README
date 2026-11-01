@@ -1,4 +1,4 @@
-# Gradebook Merge
+# gradebook-merge
 
 ## Description
 
@@ -20,8 +20,8 @@ The command-line interface is named **`gbmerge`**. It provides commands for vali
 ### Requirements
 
 - **Python 3.10 or newer**
-- An LMS gradebook file in a supported format
-- A Gradescope export file in a supported format
+- No additional dependencies or input files are required to install the project
+- You will provide the LMS gradebook and Gradescope export files when using it.
 
 ### Installation
 
@@ -69,55 +69,132 @@ Follow these steps to prepare and merge grades:
 
 1. **Prepare the input files:** Export the LMS gradebook and Gradescope scores.
 2. **Initialize configuration:** Create a configuration file if your workflow requires one.
+   ```bash
+   gbmerge init-config
+   ```
+   This creates gbmerge.yml, which you can edit to customize grading policies, late penalties, and other settings. If the default settings work for your course, you can skip this step.
 3. **Validate the inputs:** Check the files for compatibility and review student matching.
+   ```bash
+   gbmerge check --roster roster.csv --exports exports --assignment "Assignment Name"
+   ```
+   Replace the example filenames and assignment name with your own.
 4. **Generate a match report:** Investigate questionable or uncertain student matches.
+   ```bash
+   gbmerge match-report --roster roster.csv --exports exports
+   ```
+   Check for unmatched students, unmatched submissions, or ambiguous matches that may need attention.
 5. **Merge the grades:** Run the merge command with the appropriate options.
+   ```bash
+   gbmerge merge --roster roster.csv --exports exports --assignment "Assignment Name" --dry-run
+    ```
+   If the preview looks correct, run the command again without --dry-run to generate the updated gradebook.
 6. **Review the output:** Inspect the updated gradebook carefully before uploading it to the LMS.
 
 ### Configuration
 
-The repository includes **`config-example.yml`** as a starting point for configuration.
+Generate `gbmerge.yml` using the initialization command:
 
+```bash
+gbmerge init-config
+```
 Review the configuration carefully before using it for a course. **Grading options must reflect the course's actual grading policies.** For example, do not enable a `drop-lowest` setting unless the course actually uses that grading rule.
 
 ## API
 
-The project provides both a **Python API** and the **`gbmerge` command-line interface**.
+The `gbmerge` package exposes functions and classes for loading gradebooks, matching students, applying grading policies, and generating upload files.
 
-The main API entry point is `MergeJob`. The package also supports functionality related to:
+### Main Classes
 
-- Student matching
-- Grading policies
-- Upload planning
-- Output generation
-- Audit logging
+- **`MergeJob`** – Runs the complete gradebook merge workflow.
+- **`Gradebook`** – Provides step-by-step control over loading, matching, scoring, and planning.
+- **`Roster`**, **`GradescopeExport`** – Represent roster and Gradescope export data.
+- **`MatchReport`** – Stores student matching results.
+- **`Policy`** – Defines grading rules.
+- **`ScoreSheet`** – Stores calculated scores.
+- **`UploadPlan`** – Prepares grade changes for export.
 
-### Command-Line Help
+### Loading and Configuration
 
-To view all available commands and general options, run:
+- `load_roster(path)` – Loads a class roster.
+- `load_export(path)` – Loads one Gradescope export.
+- `load_exports(directory="exports")` – Loads exports from a directory.
+- `load_config(path=None)` – Loads configuration settings.
+- `find_config(start=".")` – Finds a configuration file.
+- `detect_excel_damage(fieldnames, rows)` – Checks for possible spreadsheet formatting damage.
 
-```bash
-gbmerge --help
+### Matching Students
+
+- `match_students(roster, exports, ...)` – Matches roster entries to Gradescope submissions.
+- `parse_match_on(value)` – Parses matching strategies.
+- `explain_unmatched(report, roster)` – Explains unmatched students.
+
+### Grading Policies
+
+- `apply_policy(roster, report, policy=None, ...)` – Applies grading rules.
+- `late_days(lateness_seconds, grace_minutes=0.0)` – Calculates billable late days.
+- `apply_rounding(value, mode="half_up", places=2)` – Rounds a score.
+- `drop_lowest_questions(question_scores, count)` – Drops the lowest question scores.
+- `register_policy(name, fn=None)` – Registers a custom grading policy.
+- `get_policy(name)` – Retrieves a registered policy.
+- `available_policies()` – Lists available policies.
+
+### Creating Upload Files
+
+- `build_upload_plan(roster, sheet, assignment_column, ...)` – Builds a grade upload plan.
+- `write_upload_csv(path, plan, ...)` – Writes the upload CSV.
+- `write_audit_log(path, plan, ...)` – Writes an audit log.
+
+### Extending Grading Policies
+
+Custom policies can be registered using `register_policy`. A policy receives a `ScoreContext` and returns a `PolicyOutcome` or numeric score.
+
+```python
+from gbmerge import register_policy, PolicyOutcome
+
+@register_policy("my_policy")
+def my_policy(context):
+    # Add custom grading logic here
+    return PolicyOutcome(score=0)
+from gbmerge import register_policy, PolicyOutcome
+
+@register_policy("my_policy")
+def my_policy(context):
+    # Add custom grading logic here
+    return PolicyOutcome(score=0)
 ```
+Example
+```python
+from gbmerge import MergeJob, load_config
 
-To view the options for the merge operation, run:
+config = load_config()
+job = MergeJob(
+    roster="roster.csv",
+    exports="exports",
+    assignment="Assignment 1",
+    config=config,
+)
 
-```bash
+job.load()
+job.match()
+job.score()
+plan = job.plan()
+job.write(plan, out="upload.csv")
+```
+Errors
+The package defines GbmergeError and specialized exceptions, including ConfigError, RosterError, ExportError, MatchError, PolicyError, and WriteError.
+
+For command-line options, run:
+```Bash
+gbmerge --help
 gbmerge merge --help
 ```
 
-### Python API Reference
-
-The implementation is located in **`src/gbmerge/`**.
-
-Refer to the source files in this directory for the exact class constructors, function signatures, parameters, and return values.
-
 ## Maintainers
 
-This README is maintained by **Shritan Kondaveti** as part of the CS305 README assignment in the **CS305_README** GitHub repository.
+This README is maintained by **Shritan Kondaveti(skondaveti-sys)** as part of the CS305 README assignment in the **CS305_README** GitHub repository.
 
 ## Credits
 
 This repository is based on the original **readme-project-gradebook-merge** project.
 
-Credit goes to the original project author, **Tim Richards**.
+Credit goes to the original project author, **Ana**.
